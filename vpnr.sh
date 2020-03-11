@@ -41,6 +41,6 @@ echo "Reverse tunnel ssh port:       $REVERSE_TUNNEL_PORT"
 echo "Remote (hidden) node ssh port: $HIDDEN_NODE_PORT"
 
 
-ssh -Ng -R *:$REVERSE_TUNNEL_PORT:localhost:$HIDDEN_NODE_PORT -p $PROXY_SSHD_PORT $USER_B@$PROXY
+ssh -Ng -R *:$REVERSE_TUNNEL_PORT:localhost:$HIDDEN_NODE_PORT -p $PROXY_SSHD_PORT -o ServerAliveInterval=20 $USER_B@$PROXY
 
 
