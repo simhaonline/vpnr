@@ -30,16 +30,39 @@ USER_B=user
 PROXY=publicip.example.org
 
 #------------------------------------------------------------------------------
+# Misc
+LOCKFILE=/tmp/vpnr_running.lock
+LOGFILE=/tmp/vpnr.log
+
+#------------------------------------------------------------------------------
+# Functions
+
+function lock_or_quit()
+{
+	if [[ -f "$LOCKFILE" ]]; then
+		echo "Lockfile already present, quitting." | tee -a "$LOGFILE"
+		exit 1
+	fi
+
+	touch "$LOCKFILE"
+	trap "rm -fv $LOCKFILE" EXIT
+}
+
+#------------------------------------------------------------------------------
 # Actual script
 
-echo "------------------------------"
-echo "        VPNr started"
-echo
-echo "Using proxy:                   $PROXY"
-echo "Proxy ssh port:                $PROXY_SSHD_PORT"
-echo "Reverse tunnel ssh port:       $REVERSE_TUNNEL_PORT"
-echo "Remote (hidden) node ssh port: $HIDDEN_NODE_PORT"
+now=$(date)
 
+echo "---------------------------------------------------------------" | tee -a "$LOGFILE"
+echo "        VPNr started on $now"                                    | tee -a "$LOGFILE"
+echo                                                                   | tee -a "$LOGFILE"
+echo "Using proxy:                   $PROXY"                           | tee -a "$LOGFILE"
+echo "Proxy ssh port:                $PROXY_SSHD_PORT"                 | tee -a "$LOGFILE"
+echo "Reverse tunnel ssh port:       $REVERSE_TUNNEL_PORT"             | tee -a "$LOGFILE"
+echo "Remote (hidden) node ssh port: $HIDDEN_NODE_PORT"                | tee -a "$LOGFILE"
+
+# check for locks
+lock_or_quit
 
 ssh -Ng -R *:$REVERSE_TUNNEL_PORT:localhost:$HIDDEN_NODE_PORT -p $PROXY_SSHD_PORT -o ServerAliveInterval=20 $USER_B@$PROXY
 
